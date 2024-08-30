@@ -14,11 +14,6 @@ const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
 
-// Defina uma rota para a raiz
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
-
 // Load json data 
 async function loadData() {
   try {
