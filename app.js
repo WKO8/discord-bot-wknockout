@@ -19,11 +19,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Inicie o servidor
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
 // Load json data 
 async function loadData() {
   try {
