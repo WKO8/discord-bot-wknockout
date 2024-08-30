@@ -28,13 +28,22 @@ async function loadData() {
     },
     "mods": ["444639884150308864"]
   }
+
   try {
-    // Check if the file exists
-    if (!fsSync.existsSync('data.json')) {
-      // If the file doesn't exist, create it with an empty object
-      await fs.writeFile('data.json', JSON.stringify(empty_data), 'utf8');
-      console.log('data.json file created');
+    // Verifica se o arquivo existe
+    await fs.access('data.json');
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      // Se o arquivo não existir, cria um arquivo vazio
+      console.log('File not found, creating data.json...');
+      await fs.writeFile('data.json', JSON.stringify(empty_data));
+    } else {
+      console.error('Error checking file existence:', error);
+      return {};
     }
+  }
+
+  try {
     const data = await fs.readFile('data.json', 'utf8');
     return JSON.parse(data);
   } catch (error) {
