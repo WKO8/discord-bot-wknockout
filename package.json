@@ -1,0 +1,25 @@
+{
+  "name": "discord-bot-wknockout",
+  "version": "1.0.0",
+  "description": "A Discord BOT to control the amount of itens in GTA RP",
+  "main": "app.js",
+  "type": "module",
+  "engines": {
+    "node": ">=18.x"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "register": "node commands.js",
+    "dev": "nodemon app.js"
+  },
+  "author": "W_K.O",
+  "license": "MIT",
+  "dependencies": {
+    "discord-interactions": "^4.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
