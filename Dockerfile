@@ -16,11 +16,8 @@ COPY . .
 # Copy the init script to the container
 COPY run.sh ./
 
-# Define the port your app will run on
-ENV PORT 3000
-
 # Expose the port that will be used
-EXPOSE $PORT
+EXPOSE 3000
 
 # Give the script execution permission
 RUN chmod +x run.sh
