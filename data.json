@@ -1,1 +1,15 @@
-{"data":{"folhas_de_coca":10,"cocaina_pronta":0,"lockpick":0,"bandagem":12,"dinheiro_sujo":40,"dinheiro_limpo":50,"mesa_de_droga":2},"mods":["444639884150308864"]}
+{
+  "data": {
+    "folhas_de_coca": 10,
+    "cocaina_pronta": 0,
+    "lockpick": 0,
+    "bandagem": 12,
+    "dinheiro_sujo": 40,
+    "dinheiro_limpo": 50,
+    "mesa_de_droga": 2
+  },
+  "mods": [
+    "444639884150308864",
+    "281958630704545822"
+  ]
+}
