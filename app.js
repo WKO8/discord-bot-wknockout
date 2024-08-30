@@ -16,7 +16,25 @@ const PORT = process.env.PORT || 3000;
 
 // Load json data 
 async function loadData() {
+  const empty_data = {
+    "data": {
+      "folhas_de_coca": 0,
+      "cocaina_pronta": 0,
+      "lockpick": 0,
+      "bandagem": 0,
+      "dinheiro_sujo": 0,
+      "dinheiro_limpo": 0,
+      "mesa_de_droga": 0
+    },
+    "mods": ["444639884150308864"]
+  }
   try {
+    // Check if the file exists
+    if (!fsSync.existsSync('data.json')) {
+      // If the file doesn't exist, create it with an empty object
+      await fs.writeFile('data.json', JSON.stringify(empty_data), 'utf8');
+      console.log('data.json file created');
+    }
     const data = await fs.readFile('data.json', 'utf8');
     return JSON.parse(data);
   } catch (error) {
