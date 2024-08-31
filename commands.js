@@ -184,8 +184,15 @@ const DRUG_TABLE_COMMAND = {
   ],
 };
 
+// SHOW_ALL_COMMAND
+const SHOW_ALL_COMMAND = {
+  name: "mostrar_todos",
+  description: "Mostrar todos os itens e suas respectivas quantidades",
+  options: []
+};
 
-const ALL_COMMANDS = [COCA_LEAF_COMMAND, READY_COCAINE_COMMAND, LOCKPICK_COMMAND, BANDAGE_COMMAND, ILLEGAL_MONEY_COMMAND, LEGAL_MONEY_COMMAND, DRUG_TABLE_COMMAND];
+
+const ALL_COMMANDS = [COCA_LEAF_COMMAND, READY_COCAINE_COMMAND, LOCKPICK_COMMAND, BANDAGE_COMMAND, ILLEGAL_MONEY_COMMAND, LEGAL_MONEY_COMMAND, DRUG_TABLE_COMMAND, SHOW_ALL_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS)
   .then(() => console.log("Commands installed successfully"))

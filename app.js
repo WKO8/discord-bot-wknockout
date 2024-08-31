@@ -82,9 +82,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
    */
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
-
-    const actionSelected = data.options[0].value;
-    const amount = data.options[1] ? data.options[1].value : 0;
+    
+    const actionSelected = data.options ? data.options[0].value : 'total' ;
+    const amount = data.options ? data.options[1].value : 0;
     const userID = member.user.id
     let jsonData = await loadData();
     const userIsMod = jsonData.mods.includes(userID)
@@ -514,6 +514,26 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
             },
           });
       }
+    }
+
+    // "mostrar_todos" command
+    if (name === 'mostrar_todos') {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: `\`\`\`
+            ITENS             |  QUANTIDADE
+            ---------------------------------------
+            Folhas de coca    : ${jsonData.data.folhas_de_coca}
+            Cocaína pronta    : ${jsonData.data.cocaina_pronta}
+            Lockpicks         : ${jsonData.data.lockpick}
+            Bandagens         : ${jsonData.data.bandagem}
+            Dinheiro sujo     : ${jsonData.data.dinheiro_sujo}
+            Dinheiro limpo    : ${jsonData.data.dinheiro_limpo}
+            Mesas de droga    : ${jsonData.data.mesa_de_droga}
+            \`\`\``,
+        },
+      });
     }
 
     console.error(`unknown command: ${name}`);
