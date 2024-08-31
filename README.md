@@ -11,6 +11,7 @@ This project is a Discord bot designed to manage in-game resources with various 
 - **/dinheiro_sujo**: Control legal money quantities.
 - **/dinheiro_limpo**: Control illegal money quantities.
 - **/mesa_de_droga**: Control drug tables quantities.
+- **/mostrar_todos**: Show all items and their quantities.
 
 ## Getting Started
 
