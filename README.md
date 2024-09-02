@@ -2,7 +2,7 @@
 
 This project is a Discord bot designed to manage in-game resources with various slash commands. It uses Node.js and the `discord-interactions` package to handle interactions with the Discord API.
 
-## Features of a Drug Faction
+## Features of a Drug Faction (8 commands)
 
 - **/folhas_de_coca**: Control lockpick quantities.
 - **/cocainas_prontas**: Control cocaine quantities.
