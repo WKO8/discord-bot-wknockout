@@ -7,59 +7,12 @@ import {
 } from 'discord-interactions';
 
 // library to read and write files
-import { promises as fs } from 'fs';
+import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
 
 // Create an express app
 const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
-
-// Load json data 
-async function loadData() {
-  const empty_data = {
-    "data": {
-      "folhas_de_coca": 0,
-      "cocaina_pronta": 0,
-      "lockpick": 0,
-      "bandagem": 0,
-      "dinheiro_sujo": 0,
-      "dinheiro_limpo": 0,
-      "mesa_de_droga": 0
-    },
-    "mods": ["444639884150308864"]
-  }
-
-  try {
-    // Verifica se o arquivo existe
-    await fs.access('data.json');
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      // Se o arquivo não existir, cria um arquivo vazio
-      console.log('File not found, creating data.json...');
-      await fs.writeFile('data.json', JSON.stringify(empty_data));
-    } else {
-      console.error('Error checking file existence:', error);
-      return {};
-    }
-  }
-
-  try {
-    const data = await fs.readFile('data.json', 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading data file:', error);
-    return {};
-  }
-}
-
-// Write json data 
-async function saveData(data) {
-  try {
-    await fs.writeFile('data.json', JSON.stringify(data));
-  } catch (error) {
-    console.error('Error writing data file:', error);
-  }
-}
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -67,7 +20,7 @@ async function saveData(data) {
  */
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   // Interaction type and data
-  const { type, member, data } = req.body;
+  const { type, member, data, guild_id } = req.body;
 
   /**
    * Handle verification requests
@@ -82,458 +35,99 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
    */
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
-    
-    const actionSelected = data.options ? data.options[0].value : 'total' ;
+
+    const actionSelected = data.options ? data.options[0].value : 'total';
     const amount = data.options ? data.options[1].value : 0;
     const userID = member.user.id
-    let jsonData = await loadData();
-    const userIsMod = jsonData.mods.includes(userID)
+    const guildID = guild_id.toString();
+    let allData = await getAllItems(guildID);
+    const userIsMod = allData.mods.includes(userID);
+    const commandsList = await getCommandList(guildID);
 
-    // "folha_de_coca" command
-    if (name === 'folhas_de_coca') {
-      switch (actionSelected) {
-        case 'add':
-          jsonData.data.folhas_de_coca += amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionada(s) ${amount} folha(s) de coca.`,
-            },
-          });
-        case 'sub':
-          jsonData.data.folhas_de_coca -= amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirada(s) ${amount} folha(s) de coca.`,
-            },
-          });
-        case 'update':
-          if (!userIsMod) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não tem permissão para fazer isso.',
-              },
-            });
-          }
-
-          jsonData.data.folhas_de_coca = amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de folhas de coca para ${amount}.`,
-            },
-          });
-        case 'total':
-          const total = jsonData.data.folhas_de_coca
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de folhas de coca é ${total}!`,
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
-    }
-
-    // "cocaina_pronta" command
-    if (name === 'cocaina_pronta') {
-      switch (actionSelected) {
-        case 'add':
-          jsonData.data.cocaina_pronta += amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionada(s) ${amount} cocaína(s) pronta(s).`,
-            },
-          });
-        case 'sub':
-          jsonData.data.cocaina_pronta -= amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirada(s) ${amount} cocaína(s) pronta(s).`,
-            },
-          });
-        case 'update':
-          if (!userIsMod) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não tem permissão para fazer isso.',
-              },
-            });
-          }
-
-          jsonData.data.cocaina_pronta = amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de cocaínas prontas para ${amount}.`,
-            },
-          });
-        case 'total':
-          const total = jsonData.data.cocaina_pronta
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de cocaínas prontas é ${total}!`,
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
-    }
-
-    // "lockpick" command
-    if (name === 'lockpick') {
-      switch (actionSelected) {
-        case 'add':
-          jsonData.data.lockpick += amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionada(s) ${amount} lockpick(s).`,
-            },
-          });
-        case 'sub':
-          jsonData.data.lockpick -= amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirada(s) ${amount} lockpick(s).`,
-            },
-          });
-        case 'update':
-          if (!userIsMod) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não tem permissão para fazer isso.',
-              },
-            });
-          }
-
-          jsonData.data.lockpick = amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de lockpicks para ${amount}.`,
-            },
-          });
-        case 'total':
-          const total = jsonData.data.lockpick
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de lockpicks é ${total}!`,
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
-    }
-
-    // "bandagem" command
-    if (name === 'bandagem') {
-      switch (actionSelected) {
-        case 'add':
-          jsonData.data.bandagem += amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionada(s) ${amount} bandagem(ns).`,
-            },
-          });
-        case 'sub':
-          jsonData.data.bandagem -= amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirada(s) ${amount} bandagem(ns).`,
-            },
-          });
-        case 'update':
-          if (!userIsMod) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não tem permissão para fazer isso.',
-              },
-            });
-          }
-
-          jsonData.data.bandagem = amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de bandagens para ${amount}.`,
-            },
-          });
-        case 'total':
-          const total = jsonData.data.bandagem
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de bandagens é ${total}!`,
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
-    }
-
-    // "dinheiro_sujo" command
-    if (name === 'dinheiro_sujo') {
-      switch (actionSelected) {
-        case 'add':
-          jsonData.data.dinheiro_sujo += amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionado(s) ${amount} dinheiro sujo.`,
-            },
-          });
-        case 'sub':
-          jsonData.data.dinheiro_sujo -= amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirado(s) ${amount} dinheiro sujo.`,
-            },
-          });
-        case 'update':
-          if (!userIsMod) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não tem permissão para fazer isso.',
-              },
-            });
-          }
-
-          jsonData.data.dinheiro_sujo = amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de dinheiro sujo para ${amount}.`,
-            },
-          });
-        case 'total':
-          const total = jsonData.data.dinheiro_sujo
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de dinheiro sujo é ${total}!`,
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
-    }
-
-    // "dinheiro_limpo" command
-    if (name === 'dinheiro_limpo') {
-      switch (actionSelected) {
-        case 'add':
-          jsonData.data.dinheiro_limpo += amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionado(s) ${amount} dinheiro limpo.`,
-            },
-          });
-        case 'sub':
-          jsonData.data.dinheiro_limpo -= amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirado(s) ${amount} dinheiro limpo.`,
-            },
-          });
-        case 'update':
-          if (!userIsMod) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não tem permissão para fazer isso.',
-              },
-            });
-          }
-
-          jsonData.data.dinheiro_limpo = amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de dinheiro limpo para ${amount}.`,
-            },
-          });
-        case 'total':
-          const total = jsonData.data.dinheiro_limpo
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de dinheiro limpo é ${total}!`,
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
-    }
-
-    // "mesa_de_droga" command
-    if (name === 'mesa_de_droga') {
-      switch (actionSelected) {
-        case 'add':
-          jsonData.data.mesa_de_droga += amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionada(s) ${amount} mesa(s) de droga.`,
-            },
-          });
-        case 'sub':
-          jsonData.data.mesa_de_droga -= amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirada(s) ${amount} mesas(s) de droga.`,
-            },
-          });
-        case 'update':
-          if (!userIsMod) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não tem permissão para fazer isso.',
-              },
-            });
-          }
-
-          jsonData.data.mesa_de_droga = amount;
-          saveData(jsonData);
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de mesas de droga para ${amount}.`,
-            },
-          });
-        case 'total':
-          const total = jsonData.data.mesa_de_droga
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de mesas de droga é ${total}!`,
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
-    }
-
-    // "mostrar_todos" command
+    // "mostrar_todos" specific command
     if (name === 'mostrar_todos') {
+      let message = `\`\`\`
+        ITENS                   | QUANTIDADE
+      ----------------------------------------`;
+
+      commandsList.forEach(item => {
+        if (allData.data[item.name] !== undefined) {
+          // Format the item name
+          let itemFormatted = item.name.replace(/_/g, " ");
+          itemFormatted = itemFormatted.charAt(0).toUpperCase() + itemFormatted.slice(1);
+          
+          // Calculate padding
+          let itemNamePadded = itemFormatted.padEnd(23, ' ');
+          let itemQuantity = allData.data[item.name].toString().padStart(10, ' ');
+          
+          // Append formatted item to message
+          message += `
+        ${itemNamePadded} |${itemQuantity}`;
+        }
+      });
+
+      message += `
+      ----------------------------------------\`\`\``;
+
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: `\`\`\`
-            ITENS             |  QUANTIDADE
-            ---------------------------------------
-            Folhas de coca    : ${jsonData.data.folhas_de_coca}
-            Cocaína pronta    : ${jsonData.data.cocaina_pronta}
-            Lockpicks         : ${jsonData.data.lockpick}
-            Bandagens         : ${jsonData.data.bandagem}
-            Dinheiro sujo     : ${jsonData.data.dinheiro_sujo}
-            Dinheiro limpo    : ${jsonData.data.dinheiro_limpo}
-            Mesas de droga    : ${jsonData.data.mesa_de_droga}
-            \`\`\``,
+          content: message,
         },
       });
+    }
+
+    // Check if the command exists in our list of commands
+    else if (commandsList.some(cmd => cmd.name === name)) {
+      switch (actionSelected) {
+        case 'add':
+          await incrementItem(guildID, name, amount)
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: `Adicionados(as) ${amount} ${name.replace(/_/g, " ")}.\nTotal atualizado: ${allData.data[name] + amount}`,
+            },
+          });
+        case 'sub':
+          await decrementItem(guildID, name, amount)
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: `Retirado(as) ${amount} ${name.replace(/_/g, " ")}.\nTotal atualizado: ${allData.data[name] - amount}`,
+            },
+          });
+        case 'update':
+          if (!userIsMod) {
+            return res.send({
+              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+              data: {
+                content: 'Você não tem permissão para fazer isso.',
+              },
+            });
+          }
+          await setItem(guildID, name, amount)
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: `Atualizada a quantidade de ${name.replace(/_/g, " ")} para ${amount}.`,
+            },
+          });
+        case 'total':
+          const total = await getItem(guildID, name)
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: `O número total de ${name.replace(/_/g, " ")} é ${total}!`,
+            },
+          });
+        default:
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
+            },
+          });
+      }
     }
 
     console.error(`unknown command: ${name}`);

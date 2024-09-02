@@ -13,14 +13,8 @@ RUN npm install
 # Copy the rest of your application code
 COPY . .
 
-# Copy the init script to the container
-COPY run.sh ./
-
 # Expose the port that will be used
 EXPOSE 3000
 
-# Give the script execution permission
-RUN chmod +x run.sh
-
 # Start your app
-CMD ["./run.sh"]
+CMD ["node", "app.js"]
