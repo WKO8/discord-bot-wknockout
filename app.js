@@ -101,7 +101,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
             return res.send({
               type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
               data: {
-                content: 'Você não tem permissão para fazer isso.',
+                content: 'Você não é digno para fazer isso.',
               },
             });
           }
