@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { MongoClient } from 'mongodb';
-import { InstallGlobalCommands } from "./utils.js";
+import { InstallGlobalCommands, InstallGuildCommands, ClearGlobalCommands } from "./utils.js";
 
 // Function to connect to MongoDB
 async function connectDB() {
@@ -26,7 +26,7 @@ async function installCommandsFromDB(serverId) {
     
     if (serverData && serverData.commands) {
       const commands = serverData.commands;
-      await InstallGlobalCommands(process.env.APP_ID, commands);
+      await InstallGuildCommands(process.env.APP_ID, process.env.GUILD_ID, commands);
       console.log("Commands installed successfully for server:", serverId);
     } else {
       console.log("No commands found for server:", serverId);

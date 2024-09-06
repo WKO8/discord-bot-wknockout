@@ -36,6 +36,33 @@ export async function InstallGlobalCommands(appId, commands) {
   }
 }
 
+// Function to install guild-specific commands
+export async function InstallGuildCommands(appId, guildId, commands) {
+  // API endpoint to overwrite guild commands
+  const endpoint = `applications/${appId}/guilds/${guildId}/commands`;
+
+  try {
+    // Bulk overwrite guild-specific commands
+    await DiscordRequest(endpoint, { method: 'PUT', body: commands });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// Função para limpar (remover) os comandos globais
+export async function ClearGlobalCommands(appId) {
+  // Endpoint para sobrescrever os comandos globais
+  const endpoint = `applications/${appId}/commands`;
+
+  try {
+    // Sobrescrever comandos globais com um array vazio para limpá-los
+    await DiscordRequest(endpoint, { method: 'PUT', body: [] });
+    console.log('Comandos globais removidos com sucesso!');
+  } catch (err) {
+    console.error('Erro ao remover comandos globais:', err);
+  }
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

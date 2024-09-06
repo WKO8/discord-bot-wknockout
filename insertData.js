@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 import 'dotenv/config';
 
-const uri = process.env.MONGO_URI;  // Add your connection URI in the .env file
+const uri = process.env.MONGO_URI;  // Add your connection URI in the .env filemong
 const client = new MongoClient(uri);
 
 async function connectDB() {
