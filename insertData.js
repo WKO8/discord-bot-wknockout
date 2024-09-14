@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb';
 import 'dotenv/config';
+import { ClearGuildCommands } from './utils';
 
 const uri = process.env.MONGO_URI;  // Add your connection URI in the .env filemong
 const client = new MongoClient(uri);
@@ -204,7 +205,7 @@ async function insertData() {
       dinheiro_limpo: 0,
       mesas_de_droga: 0,
     },
-    mods: [process.env.USER_MOD_ID],
+    modRole: "Admin",
   };
 
   try {
@@ -217,4 +218,5 @@ async function insertData() {
   }
 }
 
+// Insert the commands to a document in the collection database
 insertData();

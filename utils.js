@@ -63,6 +63,55 @@ export async function ClearGlobalCommands(appId) {
   }
 }
 
+export async function ClearGuildCommands(appId, guildId) {
+  // Endpoint para sobrescrever os comandos globais
+  const endpoint = `applications/${appId}/guilds/${guildId}/commands`;
+
+  try {
+    // Sobrescrever comandos globais com um array vazio para limpá-los
+    await DiscordRequest(endpoint, { method: 'PUT', body: [] });
+    console.log('Comandos de guilda removidos com sucesso!');
+  } catch (err) {
+    console.error('Erro ao remover os comandos da guilda:', err);
+  } 
+}
+
+// Function to get all roles from a specific guild
+export async function GetGuildRoles(guildId) {
+  const endpoint = `guilds/${guildId}/roles`; // Discord API endpoint to get roles
+  
+  try {
+    const res = await DiscordRequest(endpoint, { method: 'GET' });
+    const roles = await res.json(); // Parse the JSON response to get the roles
+    return roles; // Return the roles array
+  } catch (err) {
+    console.error('Erro ao obter cargos da guilda:', err);
+    throw err;
+  }
+}
+
+// Function to map role IDs to role names for a specific guild
+export async function GetRoleNamesForMember(guildId, memberRoles) {
+  try {
+    // Get all roles from the guild
+    const roles = await GetGuildRoles(guildId);
+    
+    // Create a map of role IDs to role names
+    const roleMap = {};
+    roles.forEach(role => {
+      roleMap[role.id] = role.name;
+    });
+    
+    // Map member's role IDs to their names
+    const roleNames = memberRoles.map(roleId => roleMap[roleId] || 'Cargo desconhecido');
+    
+    return roleNames; // Return array of role names
+  } catch (err) {
+    console.error('Erro ao mapear cargos:', err);
+    throw err;
+  }
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

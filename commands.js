@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { MongoClient } from 'mongodb';
-import { InstallGlobalCommands, InstallGuildCommands, ClearGlobalCommands } from "./utils.js";
+import { InstallGuildCommands, ClearGuildCommands } from "./utils.js";
 
 // Function to connect to MongoDB
 async function connectDB() {
@@ -11,7 +11,7 @@ async function connectDB() {
     await client.connect();
     console.log("Connected to MongoDB");
     return client.db(process.env.MONGO_DB);
-  } catch (error) {
+  } catch (error) { 
     console.error("Error connecting to MongoDB:", error);
   }
 }
@@ -36,8 +36,32 @@ async function installCommandsFromDB(serverId) {
   }
 }
 
-// Call the function passing the server ID
-installCommandsFromDB(process.env.GUILD_ID)
+async function updateModRoleAtDatabase(serverId, modRole) {
+  const db = await connectDB();
+  const collection = db.collection(serverId);
+
+  try {
+    const serverData = await collection.findOne({ serverID: serverId });
+    
+    if (serverData) {
+      await collection.updateOne({ serverID: serverId }, { $set: {'modRole': modRole} });
+      console.log("Mod role updated successfully.");
+    } else {
+      console.log("No data found for server:", serverId);
+    }
+  } catch (error) {
+    console.error("Error updating commands from DB: ", error);
+  }
+  return;
+}
+
+// Delete guild's commands from a specified guild
+await ClearGuildCommands(process.env.APP_ID, process.env.GUILD_ID);
+
+// await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");
+
+// Insert the commands of the document in the collection database to the discord guild 
+await installCommandsFromDB(process.env.GUILD_ID)
   .then(() => {
     console.log("Command installation process completed")
   })

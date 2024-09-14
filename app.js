@@ -8,6 +8,7 @@ import {
 
 // library to read and write files
 import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
+import { GetRoleNamesForMember } from './utils.js';
 
 // Create an express app
 const app = express();
@@ -38,11 +39,11 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
     const actionSelected = data.options ? data.options[0].value : 'total';
     const amount = data.options ? data.options[1].value : 0;
-    const userID = member.user.id
     const guildID = guild_id.toString();
     let allData = await getAllItems(guildID);
-    const userIsMod = allData.mods.includes(userID);
     const commandsList = await getCommandList(guildID);
+    const roleNames = await GetRoleNamesForMember(guildID, member.roles);
+    const hasModRole = roleNames.includes(allData.modRole);
 
     // "mostrar_todos" specific command
     if (name === 'mostrar_todos') {
@@ -97,23 +98,26 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
             },
           });
         case 'update':
-          if (!userIsMod) {
+          if (!hasModRole) {
             return res.send({
               type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
               data: {
-                content: 'Você não é digno para fazer isso.',
+                content: 'Você não é digno(a) para fazer isso.',
               },
             });
           }
+
           await setItem(guildID, name, amount)
+
           return res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
               content: `Atualizada a quantidade de ${name.replace(/_/g, " ")} para ${amount}.`,
             },
           });
+
         case 'total':
-          const total = await getItem(guildID, name)
+          const total = await getItem(guildID, name)  
           return res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
