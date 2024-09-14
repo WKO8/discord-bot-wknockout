@@ -112,6 +112,104 @@ export async function GetRoleNamesForMember(guildId, memberRoles) {
   }
 }
 
+// Function to send a message to a specific channel
+export async function SendMessageToChannel(channelId, messageContent) {
+  const endpoint = `channels/${channelId}/messages`;
+
+  try {
+    // Make the API request to send the message
+    const res = await DiscordRequest(endpoint, {
+      method: 'POST',
+      body: {
+        content: messageContent.content,
+        // embeds: messageContent.embeds, // The message you want to send
+        // components: messageContent.components, 
+      },
+    });
+
+    // Parse and return the response
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.error('Error sending message to channel:', err);
+    throw err;
+  }
+}
+
+export async function GetChannelsInGuild(guildId) {
+  const endpoint = `guilds/${guildId}/channels`;
+
+  try {
+    const res = await DiscordRequest(endpoint, { method: 'GET' });
+    const channels = await res.json();
+
+    return channels;
+  } catch (err) {
+    console.error('Error fetching channels:', err);
+    throw err;
+  }
+}
+
+// Função para verificar se o canal existe
+export async function CheckIfChannelExists(guildId, channelName) {
+  try {
+    const channels = await GetChannelsInGuild(guildId);
+
+    // Ensure channels is an array
+    if (!Array.isArray(channels)) {
+      throw new Error('Expected channels to be an array');
+    }
+
+    // Check if the channel exists using find
+    const channel = channels.find(c => c.name === channelName);
+    return channel;
+  } catch (err) {
+    console.error('Error checking if channel exists:', err);
+    throw err;
+  }
+}
+
+export async function CreateTextChannel(guildId, channelName, userID, modRoleID) {
+  const endpoint = `guilds/${guildId}/channels`;
+
+  try {
+    const res = await DiscordRequest(endpoint, {
+      method: 'POST',
+      body: {
+        name: channelName,
+        type: 0, // 0 for text channels 
+        permission_overwrites: [
+          {
+            id: userID,
+            type: 1, 
+            allow: 0x400, // View Channel
+            deny: 0x040,
+          },
+          {
+            id: modRoleID,
+            type: 0, 
+            allow: 0x400, // View Channel
+            deny: 0,
+          },
+          {
+            id: guildId,
+            type: 0, 
+            allow: 0, 
+            deny: 0x400, // View Channel
+          }
+        ], // Array of permission overwrites
+      },
+    });
+    // Retornar a resposta da API
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error('Error creating text channel:', err);
+    throw err;
+  }
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

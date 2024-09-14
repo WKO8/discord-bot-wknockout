@@ -8,7 +8,7 @@ import {
 
 // library to read and write files
 import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
-import { GetRoleNamesForMember } from './utils.js';
+import { GetGuildRoles, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, CheckIfChannelExists, DiscordRequest, GetChannelsInGuild } from './utils.js';
 
 // Create an express app
 const app = express();
@@ -122,6 +122,20 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
               content: `O número total de ${name.replace(/_/g, " ")} é ${total}!`,
+              components: [
+                    {
+                        "type": 1,
+                        "components": [
+                            {
+                                "type": 2,
+                                "label": "Click me!",
+                                "style": 1,
+                                "custom_id": "click_one"
+                            }
+                        ]
+            
+                    }
+                ]
             },
           });
         default:
@@ -138,6 +152,50 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     return res.status(400).json({ error: 'unknown command' });
   }
 
+  /**
+   * Handle interaction button response
+   */
+  if (type === InteractionType.MESSAGE_COMPONENT) {
+    const { custom_id } = data;
+    const guildID = guild_id.toString();
+    let allData = await getAllItems(guildID);
+    const ticketName = `ticket-${member.user.username.replace('.', '')}`;
+    
+    if (custom_id == "create_ticket") {
+      try {
+        const existChannel = await CheckIfChannelExists(guildID, ticketName);
+
+        if (existChannel !== undefined) {
+          const message = {
+            content: `||<@${member.user.id}>|| Você já possui este ticket aberto, feche-o para abrir outro.`,
+          }
+          SendMessageToChannel(existChannel.id, message);
+          return false;
+        }
+
+        const guildRoles = await GetGuildRoles(guildID);
+        let modRoleID;
+
+        guildRoles.forEach(role => {
+          if (role.name == allData.modRole) modRoleID = role.id
+        })
+
+        const response = await CreateTextChannel(guildID, ticketName, member.user.id, modRoleID)
+
+        const message = {
+          content: `Envie sua meta diária neste canal! ||<@${member.user.id}>||`,
+        }
+
+        await SendMessageToChannel(response.id, message)
+        
+        return res;
+
+      } catch (err) {
+        console.error(`Error creating ticket for user ${member.user.username}:`, err);
+        return err;
+      }
+    }
+  }
   console.error('unknown interaction type', type);
   return res.status(400).json({ error: 'unknown interaction type' });
 });
