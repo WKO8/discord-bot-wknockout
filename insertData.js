@@ -218,5 +218,27 @@ async function insertData() {
   }
 }
 
+async function updateModRoleAtDatabase(serverId, modRole) {
+  const db = await connectDB();
+  const collection = db.collection(serverId);
+
+  try {
+    const serverData = await collection.findOne({ serverID: serverId });
+    
+    if (serverData) {
+      await collection.updateOne({ serverID: serverId }, { $set: {'modRole': modRole} });
+      console.log("Mod role updated successfully.");
+    } else {
+      console.log("No data found for server:", serverId);
+    }
+  } catch (error) {
+    console.error("Error updating commands from DB: ", error);
+  }
+  return;
+}
+
+// Update the mod role in the collection's document
+// await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");
+
 // Insert the commands to a document in the collection database
 insertData();

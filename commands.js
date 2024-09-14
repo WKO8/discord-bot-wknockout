@@ -36,29 +36,8 @@ async function installCommandsFromDB(serverId) {
   }
 }
 
-async function updateModRoleAtDatabase(serverId, modRole) {
-  const db = await connectDB();
-  const collection = db.collection(serverId);
-
-  try {
-    const serverData = await collection.findOne({ serverID: serverId });
-    
-    if (serverData) {
-      await collection.updateOne({ serverID: serverId }, { $set: {'modRole': modRole} });
-      console.log("Mod role updated successfully.");
-    } else {
-      console.log("No data found for server:", serverId);
-    }
-  } catch (error) {
-    console.error("Error updating commands from DB: ", error);
-  }
-  return;
-}
-
 // Delete guild's commands from a specified guild
 await ClearGuildCommands(process.env.APP_ID, process.env.GUILD_ID);
-
-// await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");
 
 // Insert the commands of the document in the collection database to the discord guild 
 await installCommandsFromDB(process.env.GUILD_ID)
