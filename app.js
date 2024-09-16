@@ -8,7 +8,7 @@ import {
 
 // library to read and write files
 import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
-import { GetGuildRoles, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, CloseTextChannel } from './utils.js';
+import { GetGuildInfo, GetGuildRoles, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, CloseTextChannel } from './utils.js';
 
 // Create an express app
 const app = express();
@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
  */
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   // Interaction type and data
-  const { type, member, data, guild_id } = req.body;
+  const { type, member, data, guild, guild_id, channel_id } = req.body;
 
   /**
    * Handle verification requests
@@ -159,26 +159,24 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     const { custom_id } = data;
     const guildID = guild_id.toString();
     let allData = await getAllItems(guildID);
-    const ticketName = `ticket-${member.user.username.replace('.', '')}`;
+    const guildInfo = await GetGuildInfo(guildID);
+    const guildRoles = guildInfo.roles;
+    const ticketName = `ticket-${member.user.username.replace(/[_\.]/g, '')}`;
     
     if (custom_id == "create_ticket") {
       try {
+        const channelData = await GetSpecificChannel(guildID, ticketName)
 
-        const [ channelExists, guildRoles ] = await Promise.all([
-          GetSpecificChannel(guildID, ticketName),
-          GetGuildRoles(guildID)
-        ])
-
-        if (channelExists !== undefined) {
+        if (channelData !== undefined) {
           const message = {
             content: `||<@${member.user.id}>|| Você já possui este ticket aberto, feche-o para abrir outro.`,
             embeds: [],
             components: []
           }
-          SendMessageToChannel(existChannel.id, message);
-          return false;
+          SendMessageToChannel(channelData.id, message);
+          return;
         }
-
+        
         // Find mod role ID
         let modRoleID;
         guildRoles.forEach(role => {
@@ -186,9 +184,15 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         })
 
         const response = await CreateTextChannel(guildID, ticketName, member.user.id, modRoleID);
-        await SendTicketOpenedMessage(response.id, member.user.id);
+        await SendTicketOpenedMessage(guildInfo.name, response.id, member.user.id);
         
-        return res;
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: `**Ticket criado com sucesso! ➡️ <#${response.id}>**`,
+            flags: 1 << 6
+          },
+        });
 
       } catch (err) {
         console.error(`Error creating ticket for user ${member.user.username}:`, err);
@@ -198,9 +202,23 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
     if (custom_id == "close_ticket") {
       try {
-        const channelData = await GetSpecificChannel(guildID, ticketName);
-        const res = await CloseTextChannel(channelData.id);
-        return res;
+        let hasPermission = false;
+        guildRoles.forEach(role => {
+          if (member.roles.includes(role.id)) hasPermission = true
+        });
+
+        if (!hasPermission) {
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: `||<@${member.user.id}>|| Você não possui permissão para fechar este ticket.`,
+              flags: 1 << 6
+            },
+          })
+        }
+
+        const result = await CloseTextChannel(channel_id);
+        return result;
       } catch (err) {
         console.error(`Error closing ticket for user ${member.user.username}:`, err);
         return err;

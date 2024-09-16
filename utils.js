@@ -77,6 +77,19 @@ export async function ClearGuildCommands(appId, guildId) {
   } 
 }
 
+export async function GetGuildInfo(guildId) {
+  const endpoint = `guilds/${guildId}`; // Discord API endpoint to get guild info
+  
+  try {
+    const res = await DiscordRequest(endpoint, { method: 'GET' });
+    const guildInfo = await res.json(); // Parse the JSON response to get the guild info
+    return guildInfo; // Return the guild info object
+  } catch (err) {
+    console.error('Erro ao obter informações da guilda:', err);
+    throw err;
+  }
+}
+
 // Function to get all roles from a specific guild
 export async function GetGuildRoles(guildId) {
   const endpoint = `guilds/${guildId}/roles`; // Discord API endpoint to get roles
@@ -139,13 +152,13 @@ export async function SendMessageToChannel(channelId, messageContent) {
 }
 
 // Function to send a message when a ticket is opened 
-export async function SendTicketOpenedMessage(channelId, userId) {
+export async function SendTicketOpenedMessage(guildName, channelId, userId) {
   const message = {
     content: `||<@${userId}>||`,
     embeds: [
       {
-        title: "🔥 Vigários 🔥",
-        description: "**Ticket Aberto, envie a print da sua meta neste canal.**\n\nClique no botão abaixo para fechar o **Ticket**.",
+        title: `${guildName}`,
+        description: "**Ticket Aberto, envie as informações necessárias neste canal.**\n\nClique no botão abaixo para fechar o **Ticket**.",
         color: 0xff0000, // Cor da borda do embed (em hexadecimal)
       }
     ],

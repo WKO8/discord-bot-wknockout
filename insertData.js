@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 import 'dotenv/config';
-import { SendMessageToChannel } from './utils.js';
+import { CloseTextChannel, GetGuildInfo, SendMessageToChannel } from './utils.js';
 
 const uri = process.env.MONGO_URI;  // Add your connection URI in the .env filemong
 const client = new MongoClient(uri);
@@ -238,34 +238,37 @@ async function updateModRoleAtDatabase(serverId, modRole) {
 }
 
 
-// const message = {
-//   embeds: [
-//     {
-//       title: "🔥 Vigários 🔥",
-//       description: "**Sistema de Ticket Automático para Controle de Metas**\n\nClique no botão abaixo para abrir um **Ticket**.",
-//       color: 0xff0000, // Cor da borda do embed (em hexadecimal)
-//     }
-//   ],
-//   components: [
-//         {
-//             "type": 1,
-//             "components": [
-//                 {
-//                     "type": 2,
-//                     "label": "Abrir ticket",
-//                     "style": 1,
-//                     "custom_id": "create_ticket"
-//                 }
-//             ]
 
-//         }
-//     ]
-// }
-// const data = await SendMessageToChannel('1284645395326304407', message);
-// console.log(data);
+
+const guildInfo = await GetGuildInfo('1278745075429408779');
+
+const message = {
+  embeds: [
+    {
+      title: `${guildInfo.name}`,
+      description: "**Sistema de Ticket Automático**\n\nClique no botão abaixo para abrir um **Ticket**.",
+      color: 0xff0000, // Cor da borda do embed (em hexadecimal)
+    }
+  ],
+  components: [
+        {
+            "type": 1,
+            "components": [
+                {
+                    "type": 2,
+                    "label": "Abrir ticket",
+                    "style": 1,
+                    "custom_id": "create_ticket"
+                }
+            ]
+
+        }
+    ]
+}
+await SendMessageToChannel('1285243245894307922', message);
 
 // Update the mod role in the collection's document
-await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");
+// await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");
 
 // Insert the commands to a document in the collection database
-insertData();
+// insertData();
