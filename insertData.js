@@ -238,8 +238,6 @@ async function updateModRoleAtDatabase(serverId, modRole) {
 }
 
 
-
-
 // const message = {
 //   embeds: [
 //     {

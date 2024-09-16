@@ -8,7 +8,7 @@ import {
 
 // library to read and write files
 import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
-import { GetGuildRoles, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, CheckIfChannelExists, DiscordRequest, GetChannelsInGuild } from './utils.js';
+import { GetGuildRoles, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, CloseTextChannel } from './utils.js';
 
 // Create an express app
 const app = express();
@@ -163,35 +163,46 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     
     if (custom_id == "create_ticket") {
       try {
-        const existChannel = await CheckIfChannelExists(guildID, ticketName);
 
-        if (existChannel !== undefined) {
+        const [ channelExists, guildRoles ] = await Promise.all([
+          GetSpecificChannel(guildID, ticketName),
+          GetGuildRoles(guildID)
+        ])
+
+        if (channelExists !== undefined) {
           const message = {
             content: `||<@${member.user.id}>|| Você já possui este ticket aberto, feche-o para abrir outro.`,
+            embeds: [],
+            components: []
           }
           SendMessageToChannel(existChannel.id, message);
           return false;
         }
 
-        const guildRoles = await GetGuildRoles(guildID);
+        // Find mod role ID
         let modRoleID;
-
         guildRoles.forEach(role => {
           if (role.name == allData.modRole) modRoleID = role.id
         })
 
-        const response = await CreateTextChannel(guildID, ticketName, member.user.id, modRoleID)
-
-        const message = {
-          content: `Envie sua meta diária neste canal! ||<@${member.user.id}>||`,
-        }
-
-        await SendMessageToChannel(response.id, message)
+        const response = await CreateTextChannel(guildID, ticketName, member.user.id, modRoleID);
+        await SendTicketOpenedMessage(response.id, member.user.id);
         
         return res;
 
       } catch (err) {
         console.error(`Error creating ticket for user ${member.user.username}:`, err);
+        return err;
+      }
+    }
+
+    if (custom_id == "close_ticket") {
+      try {
+        const channelData = await GetSpecificChannel(guildID, ticketName);
+        const res = await CloseTextChannel(channelData.id);
+        return res;
+      } catch (err) {
+        console.error(`Error closing ticket for user ${member.user.username}:`, err);
         return err;
       }
     }

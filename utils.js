@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+// Function to handle request to Discord API
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL
   const url = 'https://discord.com/api/v10/' + endpoint;
@@ -122,8 +123,8 @@ export async function SendMessageToChannel(channelId, messageContent) {
       method: 'POST',
       body: {
         content: messageContent.content,
-        // embeds: messageContent.embeds, // The message you want to send
-        // components: messageContent.components, 
+        embeds: messageContent.embeds, // The message you want to send
+        components: messageContent.components, 
       },
     });
 
@@ -137,6 +138,37 @@ export async function SendMessageToChannel(channelId, messageContent) {
   }
 }
 
+// Function to send a message when a ticket is opened 
+export async function SendTicketOpenedMessage(channelId, userId) {
+  const message = {
+    content: `||<@${userId}>||`,
+    embeds: [
+      {
+        title: "🔥 Vigários 🔥",
+        description: "**Ticket Aberto, envie a print da sua meta neste canal.**\n\nClique no botão abaixo para fechar o **Ticket**.",
+        color: 0xff0000, // Cor da borda do embed (em hexadecimal)
+      }
+    ],
+    components: [
+          {
+              "type": 1,
+              "components": [
+                  {
+                      "type": 2,
+                      "label": "Fechar ticket",
+                      "style":4,
+                      "custom_id": "close_ticket"
+                  }
+              ]
+  
+          }
+      ]
+  }
+
+  SendMessageToChannel(channelId, message);
+}
+
+// Function to get all text channels in the guild
 export async function GetChannelsInGuild(guildId) {
   const endpoint = `guilds/${guildId}/channels`;
 
@@ -151,8 +183,8 @@ export async function GetChannelsInGuild(guildId) {
   }
 }
 
-// Função para verificar se o canal existe
-export async function CheckIfChannelExists(guildId, channelName) {
+// Function to get specific channel
+export async function GetSpecificChannel(guildId, channelName) {
   try {
     const channels = await GetChannelsInGuild(guildId);
 
@@ -170,6 +202,7 @@ export async function CheckIfChannelExists(guildId, channelName) {
   }
 }
 
+// Function to create a new text channel in the guild
 export async function CreateTextChannel(guildId, channelName, userID, modRoleID) {
   const endpoint = `guilds/${guildId}/channels`;
 
@@ -204,6 +237,22 @@ export async function CreateTextChannel(guildId, channelName, userID, modRoleID)
     // Retornar a resposta da API
     const data = await res.json();
     return data;
+  } catch (err) {
+    console.error('Error creating text channel:', err);
+    throw err;
+  }
+}
+
+export async function CloseTextChannel(channelId) {
+  const endpoint = `/channels/${channelId}`;
+
+  try {
+    const res = await DiscordRequest(endpoint, {
+      method: 'DELETE'
+    });
+    // Retornar a resposta da API
+    const result = await res.json();
+    return result;
   } catch (err) {
     console.error('Error creating text channel:', err);
     throw err;
