@@ -202,12 +202,12 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
     if (custom_id == "close_ticket") {
       try {
-        let hasPermission = false;
+        let modRoleID;
         guildRoles.forEach(role => {
-          if (member.roles.includes(role.id)) hasPermission = true
-        });
+          if (role.name == allData.modRole) modRoleID = role.id
+        })
 
-        if (!hasPermission) {
+        if (!member.roles.includes(modRoleID)) {
           return res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
