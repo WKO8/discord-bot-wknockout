@@ -8,7 +8,7 @@ import {
 
 // library to read and write files
 import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
-import { GetGuildInfo, GetGuildRoles, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, CloseTextChannel } from './utils.js';
+import { GetGuildInfo, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, CloseTextChannel } from './utils.js';
 
 // Create an express app
 const app = express();
@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
  */
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   // Interaction type and data
-  const { type, member, data, guild, guild_id, channel_id } = req.body;
+  const { type, member, data, guild_id, channel_id } = req.body;
 
   /**
    * Handle verification requests
@@ -183,7 +183,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
           if (role.name == allData.modRole) modRoleID = role.id
         })
 
-        const response = await CreateTextChannel(guildID, ticketName, member.user.id, modRoleID);
+        const response = await CreateTextChannel(guildID, ticketName, member.user.id, modRoleID, allData.ticketCategory);
         await SendTicketOpenedMessage(guildInfo.name, response.id, member.user.id);
         
         return res.send({

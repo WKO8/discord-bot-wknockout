@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 import 'dotenv/config';
-import { CloseTextChannel, GetGuildInfo, SendMessageToChannel } from './utils.js';
+import { GetGuildInfo, SendMessageToChannel } from './utils.js';
 
 const uri = process.env.MONGO_URI;  // Add your connection URI in the .env filemong
 const client = new MongoClient(uri);
@@ -119,6 +119,126 @@ async function insertData() {
         ],
       },
       {
+        name: "algemas",
+        description: "Controle de algemas",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de algemas",
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "capuz",
+        description: "Controle de capuz",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de capuz",
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "kits_de_reparo",
+        description: "Controle de kits de reparo",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de kits de reparo",
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "micro_ondas",
+        description: "Controle de micro-ondas",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de micro-ondas",
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "c4",
+        description: "Controle de c4",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de c4",
+            required: true,
+          },
+        ],
+      },
+      {
         name: "dinheiro_sujo",
         description: "Controle de dinheiro_sujo",
         options: [
@@ -201,11 +321,17 @@ async function insertData() {
       cocainas_prontas: 0,
       lockpicks: 0,
       bandagens: 0,
+      algemas: 0,
+      capuz: 0,
+      kits_de_reparo: 0,
+      micro_ondas: 0,
+      c4: 0,
       dinheiro_sujo: 0,
       dinheiro_limpo: 0,
       mesas_de_droga: 0,
     },
-    modRole: "Admin",
+    ticketCategory: "1269024967664734400",
+    modRole: "🚀 Gerente",
   };
 
   try {
@@ -238,37 +364,35 @@ async function updateModRoleAtDatabase(serverId, modRole) {
 }
 
 
+// const guildInfo = await GetGuildInfo('1278745075429408779');
 
+// const message = {
+//   embeds: [
+//     {
+//       title: `${guildInfo.name}`,
+//       description: "**Sistema de Ticket Automático**\n\nClique no botão abaixo para abrir um **Ticket**.",
+//       color: 0xff0000, // Cor da borda do embed (em hexadecimal)
+//     }
+//   ],
+//   components: [
+//         {
+//             "type": 1,
+//             "components": [
+//                 {
+//                     "type": 2,
+//                     "label": "Abrir ticket",
+//                     "style": 1,
+//                     "custom_id": "create_ticket"
+//                 }
+//             ]
 
-const guildInfo = await GetGuildInfo('1278745075429408779');
-
-const message = {
-  embeds: [
-    {
-      title: `${guildInfo.name}`,
-      description: "**Sistema de Ticket Automático**\n\nClique no botão abaixo para abrir um **Ticket**.",
-      color: 0xff0000, // Cor da borda do embed (em hexadecimal)
-    }
-  ],
-  components: [
-        {
-            "type": 1,
-            "components": [
-                {
-                    "type": 2,
-                    "label": "Abrir ticket",
-                    "style": 1,
-                    "custom_id": "create_ticket"
-                }
-            ]
-
-        }
-    ]
-}
-await SendMessageToChannel('1285243245894307922', message);
+//         }
+//     ]
+// }
+// await SendMessageToChannel('1285243245894307922', message);
 
 // Update the mod role in the collection's document
 // await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");
 
 // Insert the commands to a document in the collection database
-// insertData();
+insertData();

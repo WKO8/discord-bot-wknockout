@@ -216,7 +216,7 @@ export async function GetSpecificChannel(guildId, channelName) {
 }
 
 // Function to create a new text channel in the guild
-export async function CreateTextChannel(guildId, channelName, userID, modRoleID) {
+export async function CreateTextChannel(guildId, channelName, userId, modRoleId, categoryId) {
   const endpoint = `guilds/${guildId}/channels`;
 
   try {
@@ -224,16 +224,17 @@ export async function CreateTextChannel(guildId, channelName, userID, modRoleID)
       method: 'POST',
       body: {
         name: channelName,
+        parent_id: categoryId,
         type: 0, // 0 for text channels 
         permission_overwrites: [
           {
-            id: userID,
+            id: userId,
             type: 1, 
             allow: 0x400, // View Channel
             deny: 0x040,
           },
           {
-            id: modRoleID,
+            id: modRoleId,
             type: 0, 
             allow: 0x400, // View Channel
             deny: 0,
