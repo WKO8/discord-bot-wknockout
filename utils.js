@@ -307,6 +307,25 @@ export async function GiveRoleToMember(guildId, userId, roleId) {
   }
 }
 
+
+export async function ChangeUserNickname(guildId, userId, newNickname) {
+  const endpoint = `guilds/${guildId}/members/${userId}`;
+
+  try {
+    const res = await DiscordRequest(endpoint, {
+      method: 'PATCH',
+      body: {
+        nick: newNickname
+      }
+    });
+    // Retornar a resposta da API
+    return res;
+  } catch (err) {
+    console.error('Error giving role to member:', err);
+    throw err;
+  }
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

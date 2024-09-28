@@ -10,7 +10,7 @@ import {
 import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
 import { GetGuildInfo, GetRoleNamesForMember, CreateTextChannel, 
   SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, 
-  CloseTextChannel, SendRegisterModal, GiveRoleToMember } from './utils.js';
+  CloseTextChannel, SendRegisterModal, GiveRoleToMember, ChangeUserNickname } from './utils.js';
 
 // Create an express app
 const app = express();
@@ -324,6 +324,13 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     const guildID = guild_id.toString();
     let allData = await getAllItems(guildID);
 
+    let userInfo = {
+      name: '',
+      aka:' ',
+      passport: '',
+      phone: ''
+    }
+
     if (custom_id === "register_modal") {
       let message = {
         content: `**Registro de: **||<@${member.user.id}>||\n`,
@@ -339,6 +346,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
             passport: 'Passaporte',
             phone: 'Telefone'
           }
+
+          if (component.custom_id in dict) userInfo[component.custom_id] = component.value;
+
           message.content += `\n**${dict[component.custom_id]}:** ${component.value}`;
         })
       })
@@ -347,6 +357,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       await SendMessageToChannel(allData.userRegistrationChannelID, message);
       await GiveRoleToMember(guildID, member.user.id, allData.roleAfterRegistrationID);
+      await ChangeUserNickname(guildID, member.user.id, `${userInfo.aka} - ${userInfo.passport}`);
 
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
