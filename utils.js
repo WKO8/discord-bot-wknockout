@@ -273,6 +273,40 @@ export async function CloseTextChannel(channelId) {
   }
 }
 
+export async function SendRegisterModal(interactionId, interactionToken, message) {
+  const endpoint = `interactions/${interactionId}/${interactionToken}/callback`;
+
+  try {
+    const res = await DiscordRequest(endpoint, {
+      method: 'POST',
+      body: {
+        type: 9, // Modal type
+        data: message
+      }
+    });
+    // Retornar a resposta da API
+    return res;
+  } catch (err) {
+    console.error('Error giving role to member:', err);
+    throw err;
+  }
+}
+
+export async function GiveRoleToMember(guildId, userId, roleId) {
+  const endpoint = `guilds/${guildId}/members/${userId}/roles/${roleId}`;
+
+  try {
+    const res = await DiscordRequest(endpoint, {
+      method: 'PUT'
+    });
+    // Retornar a resposta da API
+    return res;
+  } catch (err) {
+    console.error('Error giving role to member:', err);
+    throw err;
+  }
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

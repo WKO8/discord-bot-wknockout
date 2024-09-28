@@ -8,7 +8,9 @@ import {
 
 // library to read and write files
 import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
-import { GetGuildInfo, GetRoleNamesForMember, CreateTextChannel, SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, CloseTextChannel } from './utils.js';
+import { GetGuildInfo, GetRoleNamesForMember, CreateTextChannel, 
+  SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, 
+  CloseTextChannel, SendRegisterModal, GiveRoleToMember } from './utils.js';
 
 // Create an express app
 const app = express();
@@ -21,7 +23,7 @@ const PORT = process.env.PORT || 3000;
  */
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   // Interaction type and data
-  const { type, member, data, guild_id, channel_id } = req.body;
+  const { type, member, data, guild_id, channel_id, token, id } = req.body;
 
   /**
    * Handle verification requests
@@ -153,10 +155,12 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
   }
 
   /**
-   * Handle interaction button response
+   * Handle button response interaction
    */
   if (type === InteractionType.MESSAGE_COMPONENT) {
     const { custom_id } = data;
+    const interactionID = id;
+    const interactionToken = token;
     const guildID = guild_id.toString();
     let allData = await getAllItems(guildID);
     const guildInfo = await GetGuildInfo(guildID);
@@ -224,7 +228,136 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         return err;
       }
     }
+
+    if (custom_id === "create_register") {
+      const modalMessage = {
+        title: "Registro - Informações do RP",
+        custom_id: "register_modal",
+        components: [
+          {
+            type: 1, // Action Row
+            components: [
+              {
+                type: 4, // Text Input
+                custom_id: "name",
+                label: "Nome",
+                style: 1, // Short text input
+                min_length: 1,
+                max_length: 100,
+                placeholder: "John",
+                required: true,
+              },
+            ],
+          },
+          {
+            type: 1, // Action Row
+            components: [
+              {
+                type: 4, // Text Input
+                custom_id: "aka",
+                label: "Vulgo",
+                style: 1, // Short text input
+                min_length: 1,
+                max_length: 100,
+                placeholder: "Flash",
+                required: true,
+              },
+            ],
+          },
+          {
+            type: 1, // Action Row
+            components: [
+              {
+                type: 4, // Text Input
+                custom_id: "passport",
+                label: "Passaporte",
+                style: 1, // Short text input
+                min_length: 1,
+                max_length: 7,
+                placeholder: "1234",
+                required: true,
+              },
+            ],
+          },
+          {
+            type: 1, // Action Row
+            components: [
+              {
+                type: 4, // Text Input
+                custom_id: "phone",
+                label: "Telefone",
+                style: 1, // Short text input
+                min_length: 7,
+                max_length: 7,
+                placeholder: "123-456",
+                required: true,
+              },
+            ],
+          },
+        ],
+      };
+      
+      try {
+        // Send the modal
+        await SendRegisterModal(interactionID, interactionToken, modalMessage);
+    
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: `**Registro iniciado com sucesso!**`,
+            flags: 1 << 6 // Ephemeral message
+          },
+        });
+        
+      } catch (err) {
+        console.error(`Error sending modal:`, err);
+        return res.status(500).send('Internal Server Error');
+      }
+    }
   }
+
+  /**
+   * Handle modal submit interaction
+   */
+  if (type === InteractionType.MODAL_SUBMIT) {
+    const { custom_id } = data;
+    const guildID = guild_id.toString();
+    let allData = await getAllItems(guildID);
+
+    if (custom_id === "register_modal") {
+      let message = {
+        content: `**Registro de: **||<@${member.user.id}>||\n`,
+        embeds: [],
+        components: [],
+      }
+
+      data.components.forEach((actionRow) => {
+        actionRow.components.forEach((component) => {
+          const dict = {
+            name: 'Nome',
+            aka: 'Vulgo',
+            passport: 'Passaporte',
+            phone: 'Telefone'
+          }
+          message.content += `\n**${dict[component.custom_id]}:** ${component.value}`;
+        })
+      })
+
+      message.content += `\n\n=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=\n\n `
+
+      await SendMessageToChannel(allData.userRegistrationChannelID, message);
+      await GiveRoleToMember(guildID, member.user.id, allData.roleAfterRegistrationID);
+
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "**Registro realizado com sucesso!**",
+          flags: 1 << 6 // Ephemeral message
+        },
+      })
+    }
+  }
+
   console.error('unknown interaction type', type);
   return res.status(400).json({ error: 'unknown interaction type' });
 });

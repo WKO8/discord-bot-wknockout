@@ -317,20 +317,22 @@ async function insertData() {
       }
     ],
     data: {
-      folhas_de_coca: 0,
-      cocainas_prontas: 0,
-      lockpicks: 0,
-      bandagens: 0,
-      algemas: 0,
+      folhas_de_coca: 62897,
+      cocainas_prontas: 10827,
+      lockpicks: 2,
+      bandagens: 59,
+      algemas: 1,
       capuz: 0,
       kits_de_reparo: 0,
       micro_ondas: 0,
       c4: 0,
-      dinheiro_sujo: 0,
-      dinheiro_limpo: 0,
+      dinheiro_sujo: 2033196,
+      dinheiro_limpo: 152563,
       mesas_de_droga: 0,
     },
-    ticketCategory: "1269024967664734400",
+    ticketCategory: "1288898918943293440",
+    userRegistrationChannelID: "1289650862482001992",
+    roleAfterRegistrationID: "1269680196001206424",
     modRole: "🚀 Gerente",
   };
 
@@ -364,13 +366,13 @@ async function updateModRoleAtDatabase(serverId, modRole) {
 }
 
 
-// const guildInfo = await GetGuildInfo('1278745075429408779');
+// const guildInfo = await GetGuildInfo('1269024967664734400');
 
 // const message = {
 //   embeds: [
 //     {
 //       title: `${guildInfo.name}`,
-//       description: "**Sistema de Ticket Automático**\n\nClique no botão abaixo para abrir um **Ticket**.",
+//       description: "**Sistema de Registro Automático**\n\nClique no botão abaixo para iniciar seu **Registro**.",
 //       color: 0xff0000, // Cor da borda do embed (em hexadecimal)
 //     }
 //   ],
@@ -380,16 +382,21 @@ async function updateModRoleAtDatabase(serverId, modRole) {
 //             "components": [
 //                 {
 //                     "type": 2,
-//                     "label": "Abrir ticket",
+//                     "label": "Registrar",
 //                     "style": 1,
-//                     "custom_id": "create_ticket"
+//                     "custom_id": "create_register"
 //                 }
 //             ]
 
 //         }
 //     ]
 // }
-// await SendMessageToChannel('1285243245894307922', message);
+
+// await SendMessageToChannel('1269432637211017227', message);
+
+
+// Call the function to send the modal
+// SendRegisterModal();
 
 // Update the mod role in the collection's document
 // await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");
