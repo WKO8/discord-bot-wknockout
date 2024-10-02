@@ -144,3 +144,42 @@ export async function getAllItems(serverId) {
     console.error('Error getting all items:', error);
   }
 }
+
+export async function addFarmToMember(serverId, membersFarm, member, farmAmount) {
+  await connectDB(); // Garantir que a conexão está estabelecida
+
+  try {
+    const collection = db.collection(serverId); // Nome da coleção
+    const existingDocument = await collection.findOne({ serverID: serverId });
+
+    if (!existingDocument) return null;
+
+    // Obtém o nome do membro, garantindo que não seja undefined
+    const memberName = member.nick ?? member.user?.username ?? "unknown_member";
+
+    // Verificar se o membro já está na lista de membersFarm
+    const memberExists = membersFarm.some(m => m.member === memberName);
+
+    if (memberExists) {
+      // Se o membro já existe, incrementar o valor de farm
+      await collection.updateOne(
+        { serverID: serverId, "membersFarm.member": memberName }, // Filtra pelo serverId e membro
+        { $inc: { "membersFarm.$.farmAmount": farmAmount, "farmTotal": farmAmount }} // Incrementa o farm do membro e o total
+      );
+    } else {
+      // Se o membro não existe, adicionar com o valor de farm e incrementar o total
+      await collection.updateOne(
+        { serverID: serverId }, // Filtrar pelo serverId
+        { 
+          $push: { membersFarm: { member: memberName, farmAmount: farmAmount } }, // Adicionar o novo membro
+          $inc: { "farmTotal": farmAmount } // Incrementar o valor total de farm
+        },
+        { upsert: true } // Garante a inserção caso o documento não exista
+      );
+    }
+
+    console.log('Atualização realizada com sucesso.');
+  } catch (error) {
+    console.error('Erro ao atualizar o farm:', error);
+  }
+}

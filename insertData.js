@@ -314,24 +314,37 @@ async function insertData() {
         name: "mostrar_todos",
         description: "Mostrar todos os itens e suas respectivas quantidades",
         options: []
+      },
+      {
+        name: "calcular_porcentagem_farm",
+        description: "Calcular a porcentagem de farm de cada membro",
+        options: [
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira o salário total a ser distribuído",
+            required: true,
+          },
+        ],
       }
     ],
     data: {
-      folhas_de_coca: 62897,
-      cocainas_prontas: 10827,
-      lockpicks: 2,
+      folhas_de_coca: 70239,
+      cocainas_prontas: 10919,
+      lockpicks: 0,
       bandagens: 59,
-      algemas: 1,
-      capuz: 0,
-      kits_de_reparo: 0,
-      micro_ondas: 0,
-      c4: 0,
-      dinheiro_sujo: 2033196,
+      algemas: 4,
+      capuz: 4,
+      kits_de_reparo: 100,
+      micro_ondas: 1,
+      c4: 9,
+      dinheiro_sujo: 2114434,
       dinheiro_limpo: 152563,
       mesas_de_droga: 0,
     },
+    membersFarm: [],
     ticketCategory: "1288898918943293440",
-    userRegistrationChannelID: "1289650862482001992",
+    userRegistrationChannelID: "1290290502939316287",
     roleAfterRegistrationID: "1269680196001206424",
     modRole: "🚀 Gerente",
   };
@@ -365,8 +378,7 @@ async function updateModRoleAtDatabase(serverId, modRole) {
   return;
 }
 
-
-// const guildInfo = await GetGuildInfo('1269024967664734400');
+// const guildInfo = await GetGuildInfo(process.env.GUILD_ID);
 
 // const message = {
 //   embeds: [
@@ -392,11 +404,13 @@ async function updateModRoleAtDatabase(serverId, modRole) {
 //     ]
 // }
 
-// await SendMessageToChannel('1269432637211017227', message);
+// await SendMessageToChannel('1290290502939316287', message);
 
 
 // Call the function to send the modal
 // SendRegisterModal();
+
+
 
 // Update the mod role in the collection's document
 // await updateModRoleAtDatabase(process.env.GUILD_ID, "🚀 Gerente");

@@ -7,7 +7,7 @@ import {
 } from 'discord-interactions';
 
 // library to read and write files
-import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList } from './db.js';
+import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList, addFarmToMember } from './db.js';
 import { GetGuildInfo, GetRoleNamesForMember, CreateTextChannel, 
   SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, 
   CloseTextChannel, SendRegisterModal, GiveRoleToMember, ChangeUserNickname } from './utils.js';
@@ -39,8 +39,6 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
 
-    const actionSelected = data.options ? data.options[0].value : 'total';
-    const amount = data.options ? data.options[1].value : 0;
     const guildID = guild_id.toString();
     let allData = await getAllItems(guildID);
     const commandsList = await getCommandList(guildID);
@@ -69,6 +67,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         }
       });
 
+      console.log(member);
+      
+
       message += `
       ----------------------------------------\`\`\``;
 
@@ -79,12 +80,41 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         },
       });
     }
+    
+    
+    else if (name === "calcular_porcentagem_farm") {
+      let message = `\`\`\`\n---------------------------------------------------------\n|           MEMBERS           |     %     |   SALARIO   |\n---------------------------------------------------------`;
 
+      const salaryTotal = parseFloat(data.options ? data.options[0].value : 0);
+      const farmTotal = parseFloat(allData.farmTotal); // Garante que farmTotal seja um número, evitando divisão por zero
+    
+      allData.membersFarm.forEach(obj => {
+        const farmValue = parseFloat(obj.farmAmount) || 0; // Garante que farm seja um número
+        const farmPercentage = ((farmValue * 100) / farmTotal).toFixed(2);
+        const salary = (salaryTotal * (farmValue / farmTotal)).toFixed(2); // Calcula o salário com base na porcentagem
+        
+        message += `\n| ${obj.member.padEnd(27)} | ${farmPercentage.padStart(7)}%  | ${salary.padStart(10)}  |`;
+      });
+    
+      message += `\n----------------------------------------------------------\`\`\``;
+    
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: message,
+        },
+      });
+    }
+    
     // Check if the command exists in our list of commands
     else if (commandsList.some(cmd => cmd.name === name)) {
+      const actionSelected = data.options ? data.options[0].value : 'total';
+      const amount = data.options ? data.options[1].value : 0;
+
       switch (actionSelected) {
         case 'add':
           await incrementItem(guildID, name, amount)
+          if (name === "folhas_de_coca") addFarmToMember(guildID, allData.membersFarm, member, amount);
           return res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
