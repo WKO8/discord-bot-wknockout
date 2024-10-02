@@ -326,6 +326,10 @@ async function insertData() {
             required: true,
           },
         ],
+      },
+      {
+        name: "reset_farm",
+        description: "Zerar o farm de todos os membros",
       }
     ],
     data: {

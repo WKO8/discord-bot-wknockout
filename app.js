@@ -7,7 +7,7 @@ import {
 } from 'discord-interactions';
 
 // library to read and write files
-import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList, addFarmToMember } from './db.js';
+import { getAllItems, incrementItem, decrementItem, setItem, getItem, getCommandList, addFarmToMember, resetFarm } from './db.js';
 import { GetGuildInfo, GetRoleNamesForMember, CreateTextChannel, 
   SendMessageToChannel, GetSpecificChannel, SendTicketOpenedMessage, 
   CloseTextChannel, SendRegisterModal, GiveRoleToMember, ChangeUserNickname } from './utils.js';
@@ -105,81 +105,19 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         },
       });
     }
-    
-    // Check if the command exists in our list of commands
-    else if (commandsList.some(cmd => cmd.name === name)) {
-      const actionSelected = data.options ? data.options[0].value : 'total';
-      const amount = data.options ? data.options[1].value : 0;
 
-      switch (actionSelected) {
-        case 'add':
-          await incrementItem(guildID, name, amount)
-          if (name === "folhas_de_coca") addFarmToMember(guildID, allData.membersFarm, member, amount);
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Adicionados(as) ${amount} ${name.replace(/_/g, " ")}.\nTotal atualizado: ${allData.data[name] + amount}`,
-            },
-          });
-        case 'sub':
-          await decrementItem(guildID, name, amount)
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Retirado(as) ${amount} ${name.replace(/_/g, " ")}.\nTotal atualizado: ${allData.data[name] - amount}`,
-            },
-          });
-        case 'update':
-          if (!hasModRole) {
-            return res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                content: 'Você não é digno(a) para fazer isso.',
-              },
-            });
-          }
+    else if (name === "reset_farm") {
+      
+      resetFarm();
 
-          await setItem(guildID, name, amount)
-
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Atualizada a quantidade de ${name.replace(/_/g, " ")} para ${amount}.`,
-            },
-          });
-
-        case 'total':
-          const total = await getItem(guildID, name)  
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `O número total de ${name.replace(/_/g, " ")} é ${total}!`,
-              components: [
-                    {
-                        "type": 1,
-                        "components": [
-                            {
-                                "type": 2,
-                                "label": "Click me!",
-                                "style": 1,
-                                "custom_id": "click_one"
-                            }
-                        ]
-            
-                    }
-                ]
-            },
-          });
-        default:
-          return res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: 'Ação inválida! Por favor, escolha entre "adicionar", "retirar", "atualizar", ou "total".',
-            },
-          });
-      }
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "Farm resetado com sucesso.",
+        },
+      });
     }
-
+    
     console.error(`unknown command: ${name}`);
     return res.status(400).json({ error: 'unknown command' });
   }

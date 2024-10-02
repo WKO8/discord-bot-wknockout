@@ -183,3 +183,15 @@ export async function addFarmToMember(serverId, membersFarm, member, farmAmount)
     console.error('Erro ao atualizar o farm:', error);
   }
 }
+
+export async function resetFarm() {
+  await connectDB(); // Garantir que a conexão está estabelecida
+  try {
+    const collection = db.collection(serverId); // Nome da coleção
+    const update = { $set: { membersFarm: [] }, $set: {"farmTotal": 0}};
+    await collection.updateOne({}, update); // Atualizar todos os documentos
+    console.log('Farm resetado com sucesso.');
+  } catch (error) {
+    console.error('Erro ao resetar o farm:', error);
+  }
+}
