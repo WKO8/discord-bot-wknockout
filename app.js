@@ -83,6 +83,15 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     
     
     else if (name === "calcular_porcentagem_farm") {
+      if (!hasModRole) {
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: 'Você não é digno(a) para fazer isso.',
+          },
+        });
+      }
+      
       let message = `\`\`\`\n---------------------------------------------------------\n|           MEMBERS           |     %     |   SALARIO   |\n---------------------------------------------------------`;
 
       const salaryTotal = parseFloat(data.options ? data.options[0].value : 0);
@@ -107,7 +116,15 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     }
 
     else if (name === "reset_farm") {
-      
+      if (!hasModRole) {
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: 'Você não é digno(a) para fazer isso.',
+          },
+        });
+      }
+
       resetFarm(guildID);
 
       return res.send({
