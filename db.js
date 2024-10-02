@@ -184,7 +184,7 @@ export async function addFarmToMember(serverId, membersFarm, member, farmAmount)
   }
 }
 
-export async function resetFarm() {
+export async function resetFarm(serverId) {
   await connectDB(); // Garantir que a conexão está estabelecida
   try {
     const collection = db.collection(serverId); // Nome da coleção
