@@ -188,8 +188,13 @@ export async function resetFarm(serverId) {
   await connectDB(); // Garantir que a conexão está estabelecida
   try {
     const collection = db.collection(serverId); // Nome da coleção
-    const update = { $set: { membersFarm: [] }, $set: {"farmTotal": 0}};
-    await collection.updateOne({}, update); // Atualizar todos os documentos
+    await collection.updateOne(
+      { serverID: serverId }, // Filtrar pelo serverId
+      { 
+        $set: { membersFarm: [] }, // Reset membersFarm
+        $set: { "farmTotal": 0 } // Reset farmTotal
+      }
+    );
     console.log('Farm resetado com sucesso.');
   } catch (error) {
     console.error('Erro ao resetar o farm:', error);
