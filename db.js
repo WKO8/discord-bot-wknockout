@@ -191,7 +191,7 @@ export async function resetFarm(serverId) {
     await collection.updateOne(
       { serverID: serverId }, // Filtrar pelo serverId
       { 
-        $set: { membersFarm: [] }, // Reset membersFarm
+        $set: { "membersFarm": [] }, // Reset membersFarm
         $set: { "farmTotal": 0 } // Reset farmTotal
       }
     );
