@@ -81,7 +81,6 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       });
     }
     
-    
     else if (name === "calcular_porcentagem_farm") {
       if (!hasModRole) {
         return res.send({

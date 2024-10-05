@@ -239,6 +239,102 @@ async function insertData() {
         ],
       },
       {
+        name: "pistolas_mk2",
+        description: "Controle de pistolas MK2",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de pistolas MK2",
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "escopetas",
+        description: "Controle de escopetas",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de escopetas",
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "municoes_pistola_MK2",
+        description: "Controle de munições de pistola MK2",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de munições de pistola MK2",
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "municoes_escopeta",
+        description: "Controle de munições de escopeta",
+        options: [
+          {
+            type: 3,
+            name: "acao",
+            description: "Escolha o que deseja fazer",
+            required: true,
+            choices: [
+              { name: "adicionar", value: "add" },
+              { name: "retirar", value: "sub" },
+              { name: "atualizar", value: "update" },
+              { name: "total", value: "total" },
+            ],
+          },
+          {
+            type: 4,
+            name: "quantidade",
+            description: "Insira a quantidade de munições de escopeta",
+            required: true,
+          },
+        ],
+      },
+      {
         name: "dinheiro_sujo",
         description: "Controle de dinheiro_sujo",
         options: [
@@ -333,16 +429,20 @@ async function insertData() {
       }
     ],
     data: {
-      folhas_de_coca: 70239,
-      cocainas_prontas: 10919,
+      folhas_de_coca: 87865,
+      cocainas_prontas: 3987,
       lockpicks: 0,
       bandagens: 59,
       algemas: 4,
       capuz: 4,
-      kits_de_reparo: 100,
+      kits_de_reparo: 18,
       micro_ondas: 1,
-      c4: 9,
-      dinheiro_sujo: 2114434,
+      c4: 13,
+      pistolas_mk2: 0,
+      escopetas: 0,
+      municoes_pistola_MK2: 0,
+      municoes_escopeta: 0,
+      dinheiro_sujo: 2271688,
       dinheiro_limpo: 152563,
       mesas_de_droga: 0,
     },
