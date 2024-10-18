@@ -177,27 +177,14 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
           });
 
         case 'total':
-          const total = await getItem(guildID, name)  
+          const total = await getItem(guildID, name)
           return res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
               content: `O número total de ${name.replace(/_/g, " ")} é ${total}!`,
-              components: [
-                    {
-                        "type": 1,
-                        "components": [
-                            {
-                                "type": 2,
-                                "label": "Click me!",
-                                "style": 1,
-                                "custom_id": "click_one"
-                            }
-                        ]
-            
-                    }
-                ]
             },
           });
+          
         default:
           return res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -246,14 +233,14 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         })
 
         const response = await CreateTextChannel(guildID, ticketName, member.user.id, modRoleID, allData.ticketCategory);
-        await SendTicketOpenedMessage(guildInfo.name, response.id, member.user.id);
-        
+        await SendTicketOpenedMessage(allData, guildInfo.name, response.id, member.user.id);
+
+        let dataTicketCreated = allData.messages.ticketMessages.ticketCreated;
+        dataTicketCreated.content = dataTicketCreated.content.replace("replace_response_id", `${response.id}`);
+
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: `**Ticket criado com sucesso! ➡️ <#${response.id}>**`,
-            flags: 1 << 6
-          },
+          data: dataTicketCreated,
         });
 
       } catch (err) {
@@ -288,72 +275,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     }
 
     if (custom_id === "create_register") {
-      const modalMessage = {
-        title: "Registro - Informações do RP",
-        custom_id: "register_modal",
-        components: [
-          {
-            type: 1, // Action Row
-            components: [
-              {
-                type: 4, // Text Input
-                custom_id: "name",
-                label: "Nome",
-                style: 1, // Short text input
-                min_length: 1,
-                max_length: 100,
-                placeholder: "John",
-                required: true,
-              },
-            ],
-          },
-          {
-            type: 1, // Action Row
-            components: [
-              {
-                type: 4, // Text Input
-                custom_id: "aka",
-                label: "Vulgo",
-                style: 1, // Short text input
-                min_length: 1,
-                max_length: 100,
-                placeholder: "Flash",
-                required: true,
-              },
-            ],
-          },
-          {
-            type: 1, // Action Row
-            components: [
-              {
-                type: 4, // Text Input
-                custom_id: "passport",
-                label: "Passaporte",
-                style: 1, // Short text input
-                min_length: 1,
-                max_length: 7,
-                placeholder: "1234",
-                required: true,
-              },
-            ],
-          },
-          {
-            type: 1, // Action Row
-            components: [
-              {
-                type: 4, // Text Input
-                custom_id: "phone",
-                label: "Telefone",
-                style: 1, // Short text input
-                min_length: 7,
-                max_length: 7,
-                placeholder: "123-456",
-                required: true,
-              },
-            ],
-          },
-        ],
-      };
+      const modalMessage = allData.messages.registerMessages.registerModal;
       
       try {
         // Send the modal
@@ -398,12 +320,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       data.components.forEach((actionRow) => {
         actionRow.components.forEach((component) => {
-          const dict = {
-            name: 'Nome',
-            aka: 'Vulgo',
-            passport: 'Passaporte',
-            phone: 'Telefone'
-          }
+          const dict = allData.messages.registerMessages.registerMemberInfo
 
           if (component.custom_id in dict) userInfo[component.custom_id] = component.value;
 

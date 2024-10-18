@@ -152,31 +152,9 @@ export async function SendMessageToChannel(channelId, messageContent) {
 }
 
 // Function to send a message when a ticket is opened 
-export async function SendTicketOpenedMessage(guildName, channelId, userId) {
-  const message = {
-    content: `||<@${userId}>||`,
-    embeds: [
-      {
-        title: `${guildName}`,
-        description: "**Ticket Aberto, envie as informações necessárias neste canal.**\n\nClique no botão abaixo para fechar o **Ticket**.",
-        color: 0xff0000, // Cor da borda do embed (em hexadecimal)
-      }
-    ],
-    components: [
-          {
-              "type": 1,
-              "components": [
-                  {
-                      "type": 2,
-                      "label": "Fechar ticket",
-                      "style":4,
-                      "custom_id": "close_ticket"
-                  }
-              ]
-  
-          }
-      ]
-  }
+export async function SendTicketOpenedMessage(allData, guildName, channelId, userId) {
+  const message = allData.messages.ticketMessages.closeTicketButton;
+  message.content = message.content.replace("replace_userId", `${userId}`)
 
   SendMessageToChannel(channelId, message);
 }
@@ -306,7 +284,6 @@ export async function GiveRoleToMember(guildId, userId, roleId) {
     throw err;
   }
 }
-
 
 export async function ChangeUserNickname(guildId, userId, newNickname) {
   const endpoint = `guilds/${guildId}/members/${userId}`;
